@@ -44,7 +44,7 @@ That's all there is to it. If you want the full spec, it's the [W3C Trace Contex
 
 Solid arrows are the real request. Dotted arrows are telemetry: each service sends its spans to the Instana agent, which forwards them to the Instana backend.
 
-What you need: Docker with Compose, and an Instana account (a free trial works) so you can get an agent key.
+What you need: Docker with Compose, and an Instana account so you can get an agent key.
 
 Here is the project layout we will create, one file at a time:
 
