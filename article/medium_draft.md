@@ -44,6 +44,8 @@ That's all there is to it. If you want the full spec, it's the [W3C Trace Contex
 
 Solid arrows are the real request. Dotted arrows are telemetry: each service sends its spans to the Instana agent, which forwards them to the Instana backend.
 
+What you need: Docker with Compose, and an Instana account (a free trial works) so you can get an agent key.
+
 Here is the project layout we will create, one file at a time:
 
 ```
@@ -215,7 +217,6 @@ opentelemetry-api>=1.24.0
 opentelemetry-sdk>=1.24.0
 opentelemetry-exporter-otlp-proto-grpc>=1.24.0
 opentelemetry-instrumentation-fastapi>=0.45b0
-opentelemetry-instrumentation-httpx>=0.45b0
 ```
 
 And `service_a_order/Dockerfile`:
@@ -291,7 +292,7 @@ Then, under the same `services:` key, add the agent. It is the official Instana 
 
 ```yaml
   instana-agent:
-    image: icr.io/instana/agent:latest-arm64-dynamic   # use the amd64 tag on Intel/AMD
+    image: icr.io/instana/agent:latest-arm64-dynamic   # on Intel/AMD use latest-amd64-dynamic
     volumes:
       - ./agent-config/com.instana.agent.main.config.Agent.cfg:/opt/instana/agent/etc/instana/com.instana.agent.main.config.Agent.cfg:ro
     environment:
@@ -305,7 +306,7 @@ Then, under the same `services:` key, add the agent. It is the official Instana 
       - "42699:42699"  # agent sensor port
 ```
 
-The agent needs your keys and endpoint from the Instana UI (*More → Agents → Install Agent*). Put them in a `.env` file next to `docker-compose.yml`:
+The agent needs your keys and endpoint from the Instana UI (*Agents & Collectors → Install Agents*). Put them in a `.env` file next to `docker-compose.yml`:
 
 ```
 INSTANA_AGENT_KEY=<your agent key>
@@ -329,6 +330,8 @@ Then start everything:
 ```bash
 docker compose up --build -d
 ```
+
+⏳ The agent downloads its feature packages on first start, so give it a minute or two before you send requests.
 
 A few things worth knowing before you hit them yourself:
 
@@ -404,5 +407,7 @@ Remember the environment variable? Change `OTEL_SERVICE_NAME` in `docker-compose
 You now have the whole recipe: inject on the way out, extract on the way in, and let Instana stitch the spans together.
 
 Try it with your own services. Add a third hop, a database call, or a message queue, and watch the waterfall grow.
+
+👉 **Full code:** [github.com/CagriYonca/instana-opentelemetry-example](https://github.com/CagriYonca/instana-opentelemetry-example)
 
 *Questions or ideas? Leave a comment, I'd love to hear how you're handling tracing in your own stack.*

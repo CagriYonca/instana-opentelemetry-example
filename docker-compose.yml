@@ -22,7 +22,7 @@ services:
       - instana-agent
 
   instana-agent:
-    image: icr.io/instana/agent:latest-arm64-dynamic   # use the amd64 tag on Intel/AMD
+    image: icr.io/instana/agent:latest-arm64-dynamic   # on Intel/AMD use latest-amd64-dynamic
     volumes:
       - ./agent-config/com.instana.agent.main.config.Agent.cfg:/opt/instana/agent/etc/instana/com.instana.agent.main.config.Agent.cfg:ro
     environment:
