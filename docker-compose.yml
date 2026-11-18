@@ -1,0 +1,36 @@
+services:
+  order-service:
+    build: ./service_a_order
+    ports:
+      - "8000:8000"
+    environment:
+      - OTEL_SERVICE_NAME=checkout-service
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://instana-agent:4317
+      - PAYMENT_SERVICE_URL=http://payment-service:5001
+    depends_on:
+      - payment-service
+      - instana-agent
+
+  payment-service:
+    build: ./service_b_payment
+    ports:
+      - "5001:5001"
+    environment:
+      - OTEL_SERVICE_NAME=billing-service
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://instana-agent:4317
+    depends_on:
+      - instana-agent
+
+  instana-agent:
+    image: icr.io/instana/agent:latest-arm64-dynamic   # use the amd64 tag on Intel/AMD
+    volumes:
+      - ./agent-config/com.instana.agent.main.config.Agent.cfg:/opt/instana/agent/etc/instana/com.instana.agent.main.config.Agent.cfg:ro
+    environment:
+      - INSTANA_AGENT_KEY=${INSTANA_AGENT_KEY}
+      - INSTANA_DOWNLOAD_KEY=${INSTANA_DOWNLOAD_KEY}
+      - INSTANA_AGENT_ENDPOINT=${INSTANA_AGENT_ENDPOINT}
+      - INSTANA_AGENT_ENDPOINT_PORT=${INSTANA_AGENT_ENDPOINT_PORT:-443}
+    ports:
+      - "4317:4317"    # OTLP gRPC
+      - "4318:4318"    # OTLP HTTP
+      - "42699:42699"  # agent sensor port
